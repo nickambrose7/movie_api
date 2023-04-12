@@ -10,6 +10,7 @@ def try_parse(type, val):
 
 
 with open("movies.csv", mode="r", encoding="utf8") as csv_file:
+    # movies is a dictionary of movie_id to Movie objects
     movies = {
         try_parse(int, row["movie_id"]): Movie(
             try_parse(int, row["movie_id"]),
@@ -23,6 +24,7 @@ with open("movies.csv", mode="r", encoding="utf8") as csv_file:
     }
 
 with open("characters.csv", mode="r", encoding="utf8") as csv_file:
+    # characters is a dictionary of character_id to Character objects
     characters = {}
     for row in csv.DictReader(csv_file, skipinitialspace=True):
         char = Character(
@@ -36,6 +38,7 @@ with open("characters.csv", mode="r", encoding="utf8") as csv_file:
         characters[char.id] = char
 
 with open("conversations.csv", mode="r", encoding="utf8") as csv_file:
+    # conversations is a dictionary of conversation_id to Conversation objects
     conversations = {}
     for row in csv.DictReader(csv_file, skipinitialspace=True):
         conv = Conversation(
@@ -48,6 +51,7 @@ with open("conversations.csv", mode="r", encoding="utf8") as csv_file:
         conversations[conv.id] = conv
 
 with open("lines.csv", mode="r", encoding="utf8") as csv_file:
+    # lines is a dictionary of line_id to Line objects
     lines = {}
     for row in csv.DictReader(csv_file, skipinitialspace=True):
         line = Line(
@@ -59,10 +63,12 @@ with open("lines.csv", mode="r", encoding="utf8") as csv_file:
             row["line_text"],
         )
         lines[line.id] = line
+        # c is a Character object
         c = characters.get(line.c_id)
         if c:
             c.num_lines += 1
-
+        # conv is a Conversation object
         conv = conversations.get(line.conv_id)
         if conv:
             conv.num_lines += 1
+        
