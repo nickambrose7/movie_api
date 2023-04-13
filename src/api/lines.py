@@ -4,8 +4,7 @@ from src import database as db
 
 router = APIRouter()
 # Reference characters by name not by ID
-@router.get("/lines/{character_id}", tags=["lines"]) #tags are used to
-# group endpoints
+@router.get("/lines/{character_id}", tags=["lines"]) #tags are used to group endpoints
 def get_lines(character_id: int):
     """
     This endpoint returns a character and all the lines spoken by that
@@ -13,22 +12,44 @@ def get_lines(character_id: int):
     For each character it returns:
     * `character`: The name of the character.
     * `lines`: A list of lines spoken by the character. 
-    The lines are ordered largest to smallest by the number of words in the line. 
-    """
+    The lines are ordered largest to smallest by the number of words in the line.
     
-
-@router.get("/lines/{character_name}/conversations", tags=["conversations"])
-def get_conversations(character_name: str):
+    The URL to test this endpoint is http://0.0.0.0:3001/lines/1 
     """
-    This endpoint returns a character and all the conversations the character
+    character = db.characters.get(character_id)
+    if character:
+        lines = db.characters.get(character_id).lines
+        # Sort lines by number of words
+        lines.sort(key=lambda line: len(line.split()), reverse=True)
+        json = {
+            "character": character.name,
+            "lines": lines
+        }   
+        return json
+   
+    raise HTTPException(status_code=404, detail="Character not found")
+
+
+@router.get("/lines/{char_id}/conversations", tags=["conversations"])
+def get_conversations(char_id: int):
+    """
+    This endpoint returns a character's name and all the conversations the character
     is in. For each character it returns:
     * `character`: The name of the character.
-    * `conversations`: A list of conversations the character is in. 
-    The conversations are ordered by the number of lines in the conversation. 
+    * `conversations`: A list of conversation_ID's representing the 
+    conversations the character is in.
     """
-    json = None
+    character = db.characters.get(char_id)
+    if character:
+        conversations = db.characters.get(char_id).conversations
+        json = {
+            "character": character.name,
+            "conversations": conversations
+        }
+        return json
+   
+    raise HTTPException(status_code=404, detail="Character not found")
     
-    return json
 
 @router.get("/lines/{character_name}/longest", tags=["longest"])
 def get_longest_lines(character_name: str, 

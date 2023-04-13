@@ -22,7 +22,7 @@ def get_top_conv_characters(character):
         other_id = conv.c2_id if conv.c1_id == c_id else conv.c1_id
         line_counts[other_id] += conv.num_lines
 
-    return line_counts.most_common()
+    return line_counts.most_common() 
 
 
 @router.get("/characters/{id}", tags=["characters"])
