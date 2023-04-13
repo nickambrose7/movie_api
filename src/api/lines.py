@@ -51,8 +51,8 @@ def get_conversations(char_id: int):
     raise HTTPException(status_code=404, detail="Character not found")
     
 
-@router.get("/lines/{character_name}/longest", tags=["longest"])
-def get_longest_lines(character_name: str, 
+@router.get("/lines/longest/{char_id}", tags=["longest"])
+def get_longest_lines(char_id: int, 
                       limit: int = 10, 
                       offset: int = 0):
     """
@@ -61,13 +61,21 @@ def get_longest_lines(character_name: str,
     For each character it returns:
     * `character`: The name of the character.
     * `lines`: A list of the longest lines spoken by the character. 
-    The lines are ordered by the number of words in the line. 
+    The lines are ordered by the number of words in the line largest to smallest.
 
     The `limit` and `offset` query
     parameters are used for pagination. The `limit` query parameter specifies the
     maximum number of results to return. The `offset` query parameter specifies the
     number of results to skip before returning results.`
     """
-    json = None
-    
-    return json
+    character = db.characters.get(char_id)
+    if character:
+        lines = db.characters.get(char_id).lines
+        # Sort lines by number of words
+        lines.sort(key=lambda line: len(line.split()), reverse=True)
+        json = {
+            "character": character.name,
+            "lines": lines[offset:offset+limit]
+        }   
+        return json
+    raise HTTPException(status_code=404, detail="Character not found")

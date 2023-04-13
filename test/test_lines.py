@@ -34,6 +34,13 @@ def test_get_conversations2():
     with open("test/lines/conv4.json", encoding="utf-8") as f:
         assert response.json() == json.load(f)
 
+def test_get_longest_lines():
+    response = client.get("/lines/longest/1?limit=1&offset=2")
+    assert response.status_code == 200
+
+    with open("test/lines/lines1Lim=1Off=2", encoding="utf-8") as f:
+        assert response.json() == json.load(f)
+
 def test_404():
     response = client.get("/lines/400")
     assert response.status_code == 404
