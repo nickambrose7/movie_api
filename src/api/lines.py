@@ -3,7 +3,7 @@ from enum import Enum
 from src import database as db
 
 router = APIRouter()
-# Reference characters by name not by ID
+
 @router.get("/lines/{character_id}", tags=["lines"]) #tags are used to group endpoints
 def get_lines(character_id: int):
     """
@@ -30,7 +30,7 @@ def get_lines(character_id: int):
     raise HTTPException(status_code=404, detail="Character not found")
 
 
-@router.get("/lines/{char_id}/conversations", tags=["conversations"])
+@router.get("/lines/{char_id}/conversations", tags=["lines"])
 def get_conversations(char_id: int):
     """
     This endpoint returns a character's name and all the conversations the character
@@ -51,7 +51,7 @@ def get_conversations(char_id: int):
     raise HTTPException(status_code=404, detail="Character not found")
     
 
-@router.get("/lines/longest/{char_id}", tags=["longest"])
+@router.get("/lines/longest/{char_id}", tags=["lines"])
 def get_longest_lines(char_id: int, 
                       limit: int = 10, 
                       offset: int = 0):
