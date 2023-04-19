@@ -17,8 +17,10 @@ sess = supabase.auth.get_session()
 
 # START PLACEHOLDER CODE
 
+print(supabase.storage.from_('movie-api').list())
+
 # Reading in the log file from the supabase bucket
-log_csv = (
+verlog_csv = (
     supabase.storage.from_("movie-api")
     .download("movie_conversations_log.csv")
     .decode("utf-8")
