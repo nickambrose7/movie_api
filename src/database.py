@@ -50,35 +50,6 @@ sess = supabase.auth.get_session()
 
 # END PLACEHOLDER CODE
 
-#start my code
-
-def add_new_convo(convo):
-    #add to supabase
-    conversations_csv = (
-    supabase.storage.from_("movie-api")
-    .download("conversations.csv")
-    .decode("utf-8")
-    )
-    conversations_list = list(csv.DictReader(conversations_csv.splitlines(), skipinitialspace=True))
-    conversations_list.append(convo)
-    output_csv = io.StringIO(conversations_csv)
-    fieldnames = ["conversation_id", "character1_id", "character2_id", "movie_id"]
-    writer = csv.DictWriter(output_csv, fieldnames=fieldnames)
-    writer.writeheader()
-    writer.writerows(conversations_list)
-    supabase.storage.from_("movie-api").upload(
-        "conversations.csv",
-        bytes(output_csv.getvalue(), "utf-8"),
-        {"x-upsert": "true"},
-    )
-    # add to in-memory conversations
-    conversations[convo["conversation_id"]] = Conversation(
-        convo["conversation_id"],
-        convo["character1_id"],
-        convo["character2_id"],
-        convo["movie_id"],
-        0,
-    )
 
 
 def try_parse(type, val):
@@ -168,3 +139,62 @@ with open("characters.csv", mode="r", encoding="utf8") as csv_file:
         conv = conversations.get(line.conv_id)
         if conv:
             conv.num_lines += 1
+    last_line_id = line.id
+    print(lines[666226])
+def add_new_convo(convo):
+    #add to supabase
+    conversations_csv = (
+    supabase.storage.from_("movie-api")
+    .download("conversations.csv")
+    .decode("utf-8")
+    )
+    conversations_list = list(csv.DictReader(conversations_csv.splitlines(), skipinitialspace=True))
+    conversations_list.append(convo)
+    output_csv = io.StringIO(conversations_csv)
+    fieldnames = ["conversation_id", "character1_id", "character2_id", "movie_id"]
+    writer = csv.DictWriter(output_csv, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(conversations_list)
+    supabase.storage.from_("movie-api").upload(
+        "conversations.csv",
+        bytes(output_csv.getvalue(), "utf-8"),
+        {"x-upsert": "true"},
+    )
+    # add to in-memory conversations
+    conversations[convo["conversation_id"]] = Conversation(
+        convo["conversation_id"],
+        convo["character1_id"],
+        convo["character2_id"],
+        convo["movie_id"],
+        0,
+    )
+
+def add_new_lines(new_lines):
+    #add to supabase
+    lines_csv = (
+    supabase.storage.from_("movie-api")
+    .download("lines.csv")
+    .decode("utf-8")
+    )
+    lines_list = list(csv.DictReader(lines_csv.splitlines(), skipinitialspace=True))
+    lines_list = lines_list + new_lines
+    output_csv = io.StringIO(lines_csv)
+    fieldnames = ["line_id", "character_id", "movie_id", "conversation_id", "line_sort", "line_text"]
+    writer = csv.DictWriter(output_csv, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(lines_list)
+    supabase.storage.from_("movie-api").upload(
+        "lines.csv",
+        bytes(output_csv.getvalue(), "utf-8"),
+        {"x-upsert": "true"},
+    )
+    # add to in-memory lines
+    for line in new_lines:
+        lines[line["line_id"]] = Line(
+            line["line_id"],
+            line["character_id"],
+            line["movie_id"],
+            line["conversation_id"],
+            line["line_sort"],
+            line["line_text"],
+        )

@@ -38,13 +38,6 @@ def add_conversation(movie_id: int, conversation: ConversationJson):
     The endpoint returns the id of the resulting conversation that was created.
     """
 
-    # TODO: Remove the following two lines. This is just a placeholder to show
-    # how you could implement persistent storage.
-    #placeholder code:
-    # print(conversation)
-    # db.logs.append({"post_call_time": datetime.now(), "movie_id_added_to": movie_id})
-    # db.upload_new_log()
-
     #My code:
     # ensure that all characters are part of the referenced movie:
     if not db.characters[conversation.character_1_id].movie_id == movie_id:
@@ -64,5 +57,13 @@ def add_conversation(movie_id: int, conversation: ConversationJson):
     db.add_new_convo(convo)
     
     #create and add lines:
-    
-
+    lines = []
+    line_sort = 0
+    for line in conversation.lines:
+        db.last_line_id += 1
+        line_sort += 1
+        lines.append({"line_id": db.last_line_id, 
+                      "character_id": line.character_id, "movie_id": movie_id, 
+                      "conversation_id": db.last_convo_id, "line_sort": line_sort, 
+                      "line_text": line.line_text})
+    db.add_new_lines(lines)
