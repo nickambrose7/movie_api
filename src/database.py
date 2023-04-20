@@ -50,29 +50,35 @@ sess = supabase.auth.get_session()
 
 # END PLACEHOLDER CODE
 
-# #start my code
-# conversations_csv = (
-#     supabase.storage.from_("movie-api")
-#     .download("conversations.csv")
-#     .decode("utf-8")
-# )
+#start my code
 
-# def upload_new_convo(convo):
-#     #upload new convo to supabase at the end of the csv file
-#     output = io.StringIO() 
-#     #output.write("this is a test")
-#     csv_writer = csv.DictWriter(
-#         output, fieldnames=["conversation_id","character1_id","character2_id","movie_id"]
-#     )
-#     csv_writer = csv.writer(output)
-#     #csv_writer.writeheader()
-#     csv_writer.writerow(convo)
-#     supabase.storage.from_("movie-api").upload(
-#         "conversations.csv",
-#         bytes(output.getvalue(), "utf-8"),
-#         {"x-upsert": "true"},
-#     )
-
+def add_new_convo(convo):
+    #add to supabase
+    conversations_csv = (
+    supabase.storage.from_("movie-api")
+    .download("conversations.csv")
+    .decode("utf-8")
+    )
+    conversations_list = list(csv.DictReader(conversations_csv.splitlines(), skipinitialspace=True))
+    conversations_list.append(convo)
+    output_csv = io.StringIO(conversations_csv)
+    fieldnames = ["conversation_id", "character1_id", "character2_id", "movie_id"]
+    writer = csv.DictWriter(output_csv, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(conversations_list)
+    supabase.storage.from_("movie-api").upload(
+        "conversations.csv",
+        bytes(output_csv.getvalue(), "utf-8"),
+        {"x-upsert": "true"},
+    )
+    # add to in-memory conversations
+    conversations[convo["conversation_id"]] = Conversation(
+        convo["conversation_id"],
+        convo["character1_id"],
+        convo["character2_id"],
+        convo["movie_id"],
+        0,
+    )
 
 
 def try_parse(type, val):
@@ -134,6 +140,7 @@ with open("characters.csv", mode="r", encoding="utf8") as csv_file:
         characters[conv.c1_id].conversations.append(conv.id)
         characters[conv.c2_id].conversations.append(conv.id)
     last_convo_id = conv.id
+    print(conversations[83076])
    
 
     lines_csv = (

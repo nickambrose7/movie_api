@@ -58,8 +58,11 @@ def add_conversation(movie_id: int, conversation: ConversationJson):
     for line in conversation.lines:
         if line.character_id != conversation.character_1_id and line.character_id != conversation.character_2_id:
             raise HTTPException(status_code=403, detail="Line does not match characters")
-    # create conversation:
-    #convo = {"conversation_id": db.last_convo_id + 1, "character1_id": conversation.character_1_id, "character2_id": conversation.character_2_id, "movie_id": movie_id}
-    #db.upload_new_convo(convo)
+    # create and add conversation:
+    db.last_convo_id += 1
+    convo = {"conversation_id": db.last_convo_id, "character1_id": conversation.character_1_id, "character2_id": conversation.character_2_id, "movie_id": movie_id}
+    db.add_new_convo(convo)
+    
+    #create and add lines:
     
 

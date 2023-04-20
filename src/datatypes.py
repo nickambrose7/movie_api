@@ -30,6 +30,7 @@ class Conversation:
     c2_id: int
     movie_id: int
     num_lines: int
+    
 
 
 @dataclass
