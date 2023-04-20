@@ -17,36 +17,62 @@ sess = supabase.auth.get_session()
 
 # START PLACEHOLDER CODE
 
-print(supabase.storage.from_('movie-api').list())
+#print(supabase.storage.from_('movie-api').list())
 
-# Reading in the log file from the supabase bucket
-verlog_csv = (
-    supabase.storage.from_("movie-api")
-    .download("movie_conversations_log.csv")
-    .decode("utf-8")
-)
+# # Reading in the log file from the supabase bucket
+# log_csv = (
+#     supabase.storage.from_("movie-api")
+#     .download("movie_conversations_log.csv")
+#     .decode("utf-8")
+# )
 
-logs = []
-for row in csv.DictReader(io.StringIO(log_csv), skipinitialspace=True):
-    logs.append(row)
+# logs = []
+# for row in csv.DictReader(io.StringIO(log_csv), skipinitialspace=True):
+#     logs.append(row)
 
 
-# Writing to the log file and uploading to the supabase bucket
-def upload_new_log():
-    output = io.StringIO()
-    csv_writer = csv.DictWriter(
-        output, fieldnames=["post_call_time", "movie_id_added_to"]
-    )
-    csv_writer.writeheader()
-    csv_writer.writerows(logs)
-    supabase.storage.from_("movie-api").upload(
-        "movie_conversations_log.csv",
-        bytes(output.getvalue(), "utf-8"),
-        {"x-upsert": "true"},
-    )
+# # Writing to the log file and uploading to the supabase bucket
+# # I want to write "this is a test" to the log file"
+# def upload_new_log():
+#     output = io.StringIO() 
+#     #output.write("this is a test")
+#     csv_writer = csv.DictWriter(
+#         output, fieldnames=["post_call_time", "movie_id_added_to"]
+#     )
+#     csv_writer.writeheader()
+#     csv_writer.writerows(logs)
+#     supabase.storage.from_("movie-api").upload(
+#         "movie_conversations_log.csv",
+#         bytes(output.getvalue(), "utf-8"),
+#         {"x-upsert": "true"},
+#     )
 
 
 # END PLACEHOLDER CODE
+
+# #start my code
+# conversations_csv = (
+#     supabase.storage.from_("movie-api")
+#     .download("conversations.csv")
+#     .decode("utf-8")
+# )
+
+# def upload_new_convo(convo):
+#     #upload new convo to supabase at the end of the csv file
+#     output = io.StringIO() 
+#     #output.write("this is a test")
+#     csv_writer = csv.DictWriter(
+#         output, fieldnames=["conversation_id","character1_id","character2_id","movie_id"]
+#     )
+#     csv_writer = csv.writer(output)
+#     #csv_writer.writeheader()
+#     csv_writer.writerow(convo)
+#     supabase.storage.from_("movie-api").upload(
+#         "conversations.csv",
+#         bytes(output.getvalue(), "utf-8"),
+#         {"x-upsert": "true"},
+#     )
+
 
 
 def try_parse(type, val):
@@ -86,10 +112,17 @@ with open("characters.csv", mode="r", encoding="utf8") as csv_file:
         )
         characters[char.id] = char
 
-with open("conversations.csv", mode="r", encoding="utf8") as csv_file:
-    # conversations is a dictionary of conversation_id to Conversation objects
-    conversations = {}
-    for row in csv.DictReader(csv_file, skipinitialspace=True):
+
+# Reading in the conversations and lines from the supabase bucket
+    convo_csv = (
+        supabase.storage.from_("movie-api")
+        .download("conversations.csv")
+        .decode("utf-8")
+    )
+    conversations = {} # conversations is a dictionary of conversation_id to Conversation objects
+    for row in csv.DictReader(io.StringIO(convo_csv), skipinitialspace=True):
+        # row is a dictionary of column name to value
+        #print(row)
         conv = Conversation(
             try_parse(int, row["conversation_id"]),
             try_parse(int, row["character1_id"]),
@@ -100,11 +133,16 @@ with open("conversations.csv", mode="r", encoding="utf8") as csv_file:
         conversations[conv.id] = conv
         characters[conv.c1_id].conversations.append(conv.id)
         characters[conv.c2_id].conversations.append(conv.id)
+    last_convo_id = conv.id
+   
 
-with open("lines.csv", mode="r", encoding="utf8") as csv_file:
-    # lines is a dictionary of line_id to Line objects
-    lines = {}
-    for row in csv.DictReader(csv_file, skipinitialspace=True):
+    lines_csv = (
+        supabase.storage.from_("movie-api")
+        .download("lines.csv")
+        .decode("utf-8")
+    )
+    lines = {} # lines is a dictionary of line_id to Line objects
+    for row in csv.DictReader(io.StringIO(lines_csv), skipinitialspace=True):
         line = Line(
             try_parse(int, row["line_id"]),
             try_parse(int, row["character_id"]),
@@ -123,4 +161,3 @@ with open("lines.csv", mode="r", encoding="utf8") as csv_file:
         conv = conversations.get(line.conv_id)
         if conv:
             conv.num_lines += 1
-        
