@@ -19,45 +19,6 @@ supabase: Client = create_client(supabase_url, supabase_api_key)
 
 sess = supabase.auth.get_session()
 
-# TODO: Below is purely an example of reading and then writing a csv from supabase.
-# You should delete this code for your working example.
-
-# START PLACEHOLDER CODE
-
-#print(supabase.storage.from_('movie-api').list())
-
-# # Reading in the log file from the supabase bucket
-# log_csv = (
-#     supabase.storage.from_("movie-api")
-#     .download("movie_conversations_log.csv")
-#     .decode("utf-8")
-# )
-
-# logs = []
-# for row in csv.DictReader(io.StringIO(log_csv), skipinitialspace=True):
-#     logs.append(row)
-
-
-# # Writing to the log file and uploading to the supabase bucket
-# # I want to write "this is a test" to the log file"
-# def upload_new_log():
-#     output = io.StringIO() 
-#     #output.write("this is a test")
-#     csv_writer = csv.DictWriter(
-#         output, fieldnames=["post_call_time", "movie_id_added_to"]
-#     )
-#     csv_writer.writeheader()
-#     csv_writer.writerows(logs)
-#     supabase.storage.from_("movie-api").upload(
-#         "movie_conversations_log.csv",
-#         bytes(output.getvalue(), "utf-8"),
-#         {"x-upsert": "true"},
-#     )
-
-
-# END PLACEHOLDER CODE
-
-
 
 def try_parse(type, val):
     try:
@@ -106,7 +67,6 @@ with open("characters.csv", mode="r", encoding="utf8") as csv_file:
     conversations = {} # conversations is a dictionary of conversation_id to Conversation objects
     for row in csv.DictReader(io.StringIO(convo_csv), skipinitialspace=True):
         # row is a dictionary of column name to value
-        #print(row)
         conv = Conversation(
             try_parse(int, row["conversation_id"]),
             try_parse(int, row["character1_id"]),

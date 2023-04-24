@@ -38,7 +38,6 @@ def add_conversation(movie_id: int, conversation: ConversationJson):
     The endpoint returns the id of the resulting conversation that was created.
     """
 
-    #My code:
     # ensure that all characters are part of the referenced movie:
     if not db.characters[conversation.character_1_id].movie_id == movie_id:
         raise HTTPException(status_code=403, detail="Character 1 not in movie")

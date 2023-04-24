@@ -48,7 +48,6 @@ class movie_sort_options(str, Enum):
     rating = "rating"
 
 
-# Add get parameters
 @router.get("/movies/", tags=["movies"])
 def list_movies(
     name: str = "",
