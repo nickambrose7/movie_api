@@ -41,18 +41,7 @@ def get_movie(movie_id: int):
             "movie_id": movie_row.movie_id,
             "title": movie_row.title,
         }
-    # need to make num words a column in characters table
-    # get number of lines for each character
-    # sumLines_stmt = (
-    #     sqlalchemy.select(db.lines.c.character_id, 
-    #                       sqlalchemy.func.count().label("num_lines"))
-    #                     .group_by(db.characters.c.character_id)
-    # )
-    # with db.engine.connect() as conn:
-    #     sumLines_result = conn.execute(sumLines_stmt)
-        
-    #want my result to have three rows, character_id, name, num_lines
-    # get top characters for the movie
+
     character_stmt = (
         sqlalchemy.select(
             db.characters.c.character_id,
