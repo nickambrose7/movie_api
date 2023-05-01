@@ -74,25 +74,25 @@ async def add_conversation(movie_id: int, conversation: ConversationJson):
         new_conversation_result = conn.execute(new_conversation_stmt)
         new_conversation_id = new_conversation_result.fetchone().conversation_id
 
-    for idx, line in enumerate(conversation.lines, start=1):
-        if line.character_id not in character_ids:
-            raise HTTPException(status_code=400, detail="Line does not match conversation characters")
+        for idx, line in enumerate(conversation.lines, start=1):
+            if line.character_id not in character_ids:
+                raise HTTPException(status_code=400, detail="Line does not match conversation characters")
 
-        new_line_id_stmt = (
-            sqlalchemy.select(sqlalchemy.func.max(db.lines.c.line_id) + 1)
-        )
+            new_line_id_stmt = (
+                sqlalchemy.select(sqlalchemy.func.max(db.lines.c.line_id) + 1)
+            )
 
-        new_line_stmt = (
-            sqlalchemy.insert(db.lines)
-            .values( line_id=sqlalchemy.select(new_line_id_stmt.scalar_subquery()),
-            character_id=line.character_id,
-            movie_id=movie_id,
-            conversation_id=new_conversation_id,
-            line_sort=idx,
-            line_text=line.line_text)
-        )
+            new_line_stmt = (
+                sqlalchemy.insert(db.lines)
+                .values( line_id=sqlalchemy.select(new_line_id_stmt.scalar_subquery()),
+                character_id=line.character_id,
+                movie_id=movie_id,
+                conversation_id=new_conversation_id,
+                line_sort=idx,
+                line_text=line.line_text)
+            )
 
-        with db.engine.connect() as conn:
+            # with db.engine.connect() as conn:
             conn.execute(new_line_stmt)
 
     return {"conversation_id": new_conversation_id}
