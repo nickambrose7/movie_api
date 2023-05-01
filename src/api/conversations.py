@@ -24,7 +24,7 @@ router = APIRouter()
 
 
 @router.post("/movies/{movie_id}/conversations/", tags=["movies"])
-async def add_conversation(movie_id: int, conversation: ConversationJson):
+def add_conversation(movie_id: int, conversation: ConversationJson):
     """
     This endpoint adds a conversation to a movie. The conversation is represented
     by the two characters involved in the conversation and a series of lines between
