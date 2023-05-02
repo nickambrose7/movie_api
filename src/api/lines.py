@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from enum import Enum
 from src import database as db
-
+import sqlalchemy
 router = APIRouter()
 
 @router.get("/lines/{character_id}", tags=["lines"]) #tags are used to group endpoints
@@ -14,20 +13,32 @@ def get_lines(character_id: int):
     * `lines`: A list of lines spoken by the character. 
     The lines are ordered largest to smallest by the number of words in the line.
     
-    The URL to test this endpoint is http://0.0.0.0:3001/lines/1 
     """
-    character = db.characters.get(character_id)
-    if character:
-        lines = db.characters.get(character_id).lines
-        # Sort lines by number of words
-        lines.sort(key=lambda line: len(line.split()), reverse=True)
-        json = {
-            "character": character.name,
-            "lines": lines
-        }   
-        return json
-   
-    raise HTTPException(status_code=404, detail="Character not found")
+
+    character_stmt = (
+        sqlalchemy.select(db.characters.c.name)
+        .where(db.characters.c.character_id == character_id)
+        .limit(1)
+    )
+
+    with db.engine.connect() as conn:
+        character_result = conn.execute(character_stmt)
+        character_row = character_result.fetchone()
+        if character_row is None:
+            raise HTTPException(status_code=404, detail="Character not found")
+        character_name = character_row.name
+
+    lines_stmt = (
+        sqlalchemy.select(db.lines.c.line_text)
+        .where(db.lines.c.character_id == character_id)
+        .order_by(sqlalchemy.desc(sqlalchemy.func.length(db.lines.c.line_text)))
+    )
+
+    with db.engine.connect() as conn:
+        lines_result = conn.execute(lines_stmt)
+        lines = [row.line_text for row in lines_result]
+
+    return {"character": character_name, "lines": lines}
 
 
 @router.get("/lines/{char_id}/conversations", tags=["lines"])
@@ -39,16 +50,29 @@ def get_conversations(char_id: int):
     * `conversations`: A list of conversation_ID's representing the 
     conversations the character is in.
     """
-    character = db.characters.get(char_id)
-    if character:
-        conversations = db.characters.get(char_id).conversations
-        json = {
-            "character": character.name,
-            "conversations": conversations
-        }
-        return json
-   
-    raise HTTPException(status_code=404, detail="Character not found")
+    character_stmt = (
+        sqlalchemy.select(db.characters.c.name)
+        .where(db.characters.c.character_id == char_id)
+        .limit(1)
+    )
+
+    with db.engine.connect() as conn:
+        character_result = conn.execute(character_stmt)
+        character_row = character_result.fetchone()
+        if character_row is None:
+            raise HTTPException(status_code=404, detail="Character not found")
+        character_name = character_row.name
+
+    conversations_stmt = (
+        sqlalchemy.select(db.conversations.c.conversation_id)
+        .where((db.conversations.c.character1_id == char_id) | (db.conversations.c.character2_id == char_id))
+    )
+
+    with db.engine.connect() as conn:
+        conversations_result = conn.execute(conversations_stmt)
+        conversations = [row.conversation_id for row in conversations_result]
+
+    return {"character": character_name, "conversations": conversations}
     
 
 @router.get("/lines/longest/{char_id}", tags=["lines"])
@@ -68,14 +92,29 @@ def get_longest_lines(char_id: int,
     maximum number of results to return. The `offset` query parameter specifies the
     number of results to skip before returning results.`
     """
-    character = db.characters.get(char_id)
-    if character:
-        lines = db.characters.get(char_id).lines
-        # Sort lines by number of words
-        lines.sort(key=lambda line: len(line.split()), reverse=True)
-        json = {
-            "character": character.name,
-            "lines": lines[offset:offset+limit]
-        }   
-        return json
-    raise HTTPException(status_code=404, detail="Character not found")
+    character_stmt = (
+        sqlalchemy.select(db.characters.c.name)
+        .where(db.characters.c.character_id == char_id)
+        .limit(1)
+    )
+
+    with db.engine.connect() as conn:
+        character_result = conn.execute(character_stmt)
+        character_row = character_result.fetchone()
+        if character_row is None:
+            raise HTTPException(status_code=404, detail="Character not found")
+        character_name = character_row.name
+
+    lines_stmt = (
+        sqlalchemy.select(db.lines.c.line_text)
+        .where(db.lines.c.character_id == char_id)
+        .order_by(sqlalchemy.desc(sqlalchemy.func.length(db.lines.c.line_text)))
+        .limit(limit)
+        .offset(offset)
+    )
+
+    with db.engine.connect() as conn:
+        lines_result = conn.execute(lines_stmt)
+        lines = [row.line_text for row in lines_result]
+
+    return {"character": character_name, "lines": lines}
