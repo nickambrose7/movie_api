@@ -85,7 +85,7 @@ def get_character(id: int):
         )
         .where(
             (db.lines.c.character_id == id) &
-            (db.conversations.c.character1_id == id)
+            ((db.conversations.c.character1_id == id) | (db.conversations.c.character2_id == id))
         )
         .group_by(db.characters.c.character_id)
         .order_by(sqlalchemy.desc("number_of_lines_together"))
@@ -154,10 +154,10 @@ def list_characters(
 
     characters_stmt = (
         sqlalchemy.select(
-            db.characters.c.character_id,
-            db.characters.c.name.label("character"),
-            db.movies.c.title.label("movie"),
-            sqlalchemy.func.count(db.lines.c.line_text).label("number_of_lines"),
+        db.characters.c.character_id,
+        db.characters.c.name.label("character"),
+        db.movies.c.title.label("movie"),
+        sqlalchemy.func.count(db.lines.c.line_text.distinct()).label("number_of_lines"),
         )
         .select_from(
             db.characters.join(db.movies)
