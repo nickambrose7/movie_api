@@ -60,14 +60,14 @@ def add_conversation(movie_id: int, conversation: ConversationJson):
     )
 
     new_conversation_stmt = (
-        sqlalchemy.insert(db.conversations)
-        .values(
-            conversation_id=sqlalchemy.select(next_conversation_id_stmt.scalar_subquery()),
-            movie_id=movie_id,
-            character1_id=conversation.character_1_id,
-            character2_id=conversation.character_2_id,
-        )
-        .returning(db.conversations.c.conversation_id)
+    sqlalchemy.insert(db.conversations)
+    .values(
+        conversation_id=next_conversation_id_stmt.scalar_subquery(),
+        movie_id=movie_id,
+        character1_id=conversation.character_1_id,
+        character2_id=conversation.character_2_id,
+    )
+    .returning(db.conversations.c.conversation_id)
     )
 
     with db.engine.begin() as conn:
@@ -84,12 +84,13 @@ def add_conversation(movie_id: int, conversation: ConversationJson):
 
             new_line_stmt = (
                 sqlalchemy.insert(db.lines)
-                .values( line_id=sqlalchemy.select(new_line_id_stmt.scalar_subquery()),
-                character_id=line.character_id,
-                movie_id=movie_id,
-                conversation_id=new_conversation_id,
-                line_sort=idx,
-                line_text=line.line_text)
+                .values(
+                    line_id=new_line_id_stmt.scalar_subquery(),
+                    character_id=line.character_id,
+                    movie_id=movie_id,
+                    conversation_id=new_conversation_id,
+                    line_sort=idx,
+                    line_text=line.line_text)
             )
 
             # with db.engine.connect() as conn:
