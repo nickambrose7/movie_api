@@ -47,31 +47,6 @@ def get_character(id: int):
     * `number_of_lines_together`: The number of lines the character has with the
       originally queried character.
     """
-
-    # character = db.characters.get(id)
-
-    # if character:
-    #     movie = db.movies.get(character.movie_id)
-    #     result = {
-    #         "character_id": character.id,
-    #         "character": character.name,
-    #         "movie": movie and movie.title,
-    #         "gender": character.gender,
-    #         "top_conversations": (
-    #             {
-    #                 "character_id": other_id,
-    #                 "character": db.characters[other_id].name,
-    #                 "gender": db.characters[other_id].gender,
-    #                 "number_of_lines_together": lines,
-    #             }
-    #             for other_id, lines in get_top_conv_characters(character)
-    #         ),
-    #     }
-    #     return result
-
-    # raise HTTPException(status_code=404, detail="character not found.")
-    # rewrite of the above code using sqlalchmey:
-     # get character information
     character_stmt = (
         sqlalchemy.select(
             db.characters.c.character_id,
@@ -169,39 +144,6 @@ def list_characters(
     maximum number of results to return. The `offset` query parameter specifies the
     number of results to skip before returning results.
     """
-
-    # if name:
-
-    #     def filter_fn(c):
-    #         return c.name and name.upper() in c.name
-
-    # else:
-
-    #     def filter_fn(_):
-    #         return True
-
-    # items = list(filter(filter_fn, db.characters.values()))
-
-    # def none_last(x, reverse=False):
-    #     return (x is None) ^ reverse, x
-
-    # if sort == character_sort_options.character:
-    #     items.sort(key=lambda c: none_last(c.name))
-    # elif sort == character_sort_options.movie:
-    #     items.sort(key=lambda c: none_last(db.movies[c.movie_id].title))
-    # elif sort == character_sort_options.number_of_lines:
-    #     items.sort(key=lambda c: none_last(c.num_lines, True), reverse=True)
-
-    # json = (
-    #     {
-    #         "character_id": c.id,
-    #         "character": c.name,
-    #         "movie": db.movies[c.movie_id].title,
-    #         "number_of_lines": c.num_lines,
-    #     }
-    #     for c in items[offset : offset + limit]
-    # )
-    # return json
     sort_column_mapping = {
         "character": db.characters.c.name,
         "movie": db.movies.c.title,
