@@ -1,4 +1,3 @@
-from src.datatypes import Character, Movie, Conversation, Line
 import os
 import dotenv
 from sqlalchemy import create_engine

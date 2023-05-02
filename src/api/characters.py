@@ -1,29 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from enum import Enum
-from collections import Counter
-
 from fastapi.params import Query
 from src import database as db
 import sqlalchemy
 
 router = APIRouter()
-
-
-def get_top_conv_characters(character):
-    c_id = character.id
-    movie_id = character.movie_id
-    all_convs = filter(
-        lambda conv: conv.movie_id == movie_id
-        and (conv.c1_id == c_id or conv.c2_id == c_id),
-        db.conversations.values(),
-    )
-    line_counts = Counter()
-
-    for conv in all_convs:
-        other_id = conv.c2_id if conv.c1_id == c_id else conv.c1_id
-        line_counts[other_id] += conv.num_lines
-
-    return line_counts.most_common() 
 
 
 @router.get("/characters/{id}", tags=["characters"])
@@ -150,7 +131,6 @@ def list_characters(
         "number_of_lines": sqlalchemy.func.count(db.lines.c.line_text)
     }
 
-    sort_column = sort_column_mapping[sort]
 
     characters_stmt = (
         sqlalchemy.select(
@@ -165,7 +145,6 @@ def list_characters(
         )
         .where(db.characters.c.name.ilike(f"%{name}%"))
         .group_by(db.characters.c.character_id, db.movies.c.title)
-        #.order_by(sort_column)
     )
 
     if sort == character_sort_options.number_of_lines:

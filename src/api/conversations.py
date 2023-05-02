@@ -1,9 +1,7 @@
-from asyncio import sleep
 from fastapi import APIRouter, HTTPException
 from src import database as db
 from pydantic import BaseModel
 from typing import List
-from datetime import datetime
 import sqlalchemy
 
 
@@ -93,7 +91,6 @@ def add_conversation(movie_id: int, conversation: ConversationJson):
                     line_text=line.line_text)
             )
 
-            # with db.engine.connect() as conn:
             conn.execute(new_line_stmt)
 
     return {"conversation_id": new_conversation_id}

@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from enum import Enum
 from src import database as db
 import sqlalchemy
 router = APIRouter()
@@ -14,7 +13,6 @@ def get_lines(character_id: int):
     * `lines`: A list of lines spoken by the character. 
     The lines are ordered largest to smallest by the number of words in the line.
     
-    The URL to test this endpoint is http://0.0.0.0:3001/lines/1 
     """
 
     character_stmt = (

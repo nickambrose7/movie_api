@@ -110,7 +110,6 @@ def list_movies(
     maximum number of results to return. The `offset` query parameter specifies the
     number of results to skip before returning results.
     """
-    # the .c is a shortcut for .columns
     if sort is movie_sort_options.movie_title:
         order_by = db.movies.c.title
     elif sort is movie_sort_options.year:
