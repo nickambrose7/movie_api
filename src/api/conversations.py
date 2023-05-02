@@ -70,7 +70,7 @@ def add_conversation(movie_id: int, conversation: ConversationJson):
         .returning(db.conversations.c.conversation_id)
     )
 
-    with db.engine.connect() as conn:
+    with db.engine.begin() as conn:
         new_conversation_result = conn.execute(new_conversation_stmt)
         new_conversation_id = new_conversation_result.fetchone().conversation_id
 
